@@ -27,3 +27,6 @@
 *.log
 *.sql
 *.tar.gz
+
+# Ignore IDE config
+.idea
