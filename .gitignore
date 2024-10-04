@@ -1,0 +1,29 @@
+# Ignore DDEV directory and settings
+.ddev/
+
+# Ignore vendor directory and Composer lock file
+/vendor/
+/composer.lock
+
+# Ignore build artifacts
+/web/sites/*/files/
+/web/sites/*/private/
+
+# Ignore configuration files that shouldn't be shared
+/web/sites/default/settings.php
+/web/sites/default/settings.local.php
+
+# Ignore core files not needed in the repository
+/web/core/
+/web/modules/contrib/
+/web/themes/contrib/
+/web/profiles/contrib/
+/web/libraries/
+
+# Ignore Drush backups
+/drush-backups/
+
+# Ignore temporary files
+*.log
+*.sql
+*.tar.gz
