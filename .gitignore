@@ -5,13 +5,13 @@
 /vendor/
 /composer.lock
 
+# Do not ignore default configuration files
+!/web/sites/default/settings.php
+!/web/sites/default/settings.ddev.php
+
 # Ignore build artifacts
 /web/sites/*/files/
 /web/sites/*/private/
-
-# Ignore configuration files that shouldn't be shared
-/web/sites/default/settings.php
-/web/sites/default/settings.local.php
 
 # Ignore core files not needed in the repository
 /web/core/
