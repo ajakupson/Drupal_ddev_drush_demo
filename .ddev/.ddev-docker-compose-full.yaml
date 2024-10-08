@@ -1,0 +1,278 @@
+name: ddev-drupallearning
+networks:
+    ddev_default:
+        external: true
+        name: ddev_default
+    default:
+        labels:
+            com.ddev.platform: ddev
+        name: ddev-drupallearning_default
+services:
+    db:
+        build:
+            args:
+                BASE_IMAGE: ddev/ddev-dbserver-mariadb-10.11:v1.23.4
+                gid: "1000"
+                uid: "1000"
+                username: admin
+            context: /home/admin/Workspace/DrupalLearning/.ddev/.dbimageBuild
+            dockerfile: Dockerfile
+        cap_add:
+            - SYS_NICE
+        command: []
+        container_name: ddev-DrupalLearning-db
+        environment:
+            COLUMNS: "99"
+            DDEV_DATABASE: mariadb:10.11
+            DDEV_DATABASE_FAMILY: mysql
+            DDEV_HOSTNAME: drupallearning.ddev.site
+            DDEV_PHP_VERSION: "8.3"
+            DDEV_PRIMARY_URL: https://drupallearning.ddev.site:8443
+            DDEV_PROJECT: DrupalLearning
+            DDEV_PROJECT_TYPE: drupal10
+            DDEV_ROUTER_HTTP_PORT: "80"
+            DDEV_ROUTER_HTTPS_PORT: "8443"
+            DDEV_SITENAME: DrupalLearning
+            DDEV_TLD: ddev.site
+            DOCKER_IP: 127.0.0.1
+            GOARCH: amd64
+            GOOS: linux
+            HOST_DOCKER_INTERNAL_IP: ""
+            IS_DDEV_PROJECT: "true"
+            LINES: "22"
+            MYSQL_HISTFILE: /mnt/ddev-global-cache/mysqlhistory/DrupalLearning-db/mysql_history
+            MYSQL_PWD: db
+            PGDATABASE: db
+            PGHOST: 127.0.0.1
+            PGPASSWORD: db
+            PGUSER: db
+            POSTGRES_DB: db
+            POSTGRES_PASSWORD: db
+            POSTGRES_USER: db
+            TZ: ""
+            USER: admin
+        healthcheck:
+            interval: 1s
+            retries: 70
+            start_interval: 1s
+            start_period: 2m0s
+            timeout: 1m10s
+        hostname: DrupalLearning-db
+        image: ddev/ddev-dbserver-mariadb-10.11:v1.23.4-DrupalLearning-built
+        labels:
+            com.ddev.app-type: drupal10
+            com.ddev.approot: /home/admin/Workspace/DrupalLearning
+            com.ddev.platform: ddev
+            com.ddev.site-name: DrupalLearning
+        networks:
+            ddev_default: null
+            default: null
+        ports:
+            - host_ip: 127.0.0.1
+              mode: ingress
+              protocol: tcp
+              target: 3306
+        restart: "no"
+        stop_grace_period: 1m0s
+        user: 1000:1000
+        volumes:
+            - source: database
+              target: /var/lib/mysql
+              type: volume
+              volume:
+                nocopy: true
+            - bind:
+                create_host_path: true
+              source: /home/admin/Workspace/DrupalLearning/.ddev
+              target: /mnt/ddev_config
+              type: bind
+            - bind:
+                create_host_path: true
+              source: /home/admin/Workspace/DrupalLearning/.ddev/db_snapshots
+              target: /mnt/snapshots
+              type: bind
+            - source: ddev-global-cache
+              target: /mnt/ddev-global-cache
+              type: volume
+              volume: {}
+        working_dir: /home/admin
+    selenium-chrome:
+        container_name: ddev-DrupalLearning-selenium-chrome
+        environment:
+            HTTP_EXPOSE: 7910:7900
+            HTTPS_EXPOSE: 7900:7900
+            VIRTUAL_HOST: drupallearning.ddev.site
+            VNC_NO_PASSWORD: "1"
+        expose:
+            - "7900"
+        external_links:
+            - ddev-router:DrupalLearning.ddev.site
+        image: seleniarm/standalone-chromium:4.1.4-20220429
+        labels:
+            com.ddev.approot: /home/admin/Workspace/DrupalLearning
+            com.ddev.site-name: DrupalLearning
+        networks:
+            ddev_default: null
+            default: null
+        volumes:
+            - bind:
+                create_host_path: true
+              source: /home/admin/Workspace/DrupalLearning/.ddev
+              target: /mnt/ddev_config
+              type: bind
+    web:
+        build:
+            args:
+                BASE_IMAGE: ddev/ddev-webserver:v1.23.4
+                DDEV_DATABASE: mariadb:10.11
+                DDEV_PHP_VERSION: "8.3"
+                gid: "1000"
+                uid: "1000"
+                username: admin
+            context: /home/admin/Workspace/DrupalLearning/.ddev/.webimageBuild
+            dockerfile: Dockerfile
+        cap_add:
+            - SYS_PTRACE
+        command:
+            - /pre-start.sh
+        container_name: ddev-DrupalLearning-web
+        depends_on:
+            selenium-chrome:
+                condition: service_started
+                required: true
+                restart: true
+        environment:
+            BROWSERTEST_OUTPUT_BASE_URL: https://drupallearning.ddev.site:8443
+            BROWSERTEST_OUTPUT_DIRECTORY: /tmp
+            COLUMNS: "99"
+            COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+            COREPACK_HOME: /mnt/ddev-global-cache/corepack
+            DDEV_COMPOSER_ROOT: /var/www/html
+            DDEV_DATABASE: mariadb:10.11
+            DDEV_DATABASE_FAMILY: mysql
+            DDEV_DOCROOT: web
+            DDEV_FILES_DIR: /var/www/html/web/sites/default/files
+            DDEV_FILES_DIRS: /var/www/html/web/sites/default/files
+            DDEV_HOSTNAME: drupallearning.ddev.site
+            DDEV_MUTAGEN_ENABLED: "false"
+            DDEV_PHP_VERSION: "8.3"
+            DDEV_PRIMARY_URL: https://drupallearning.ddev.site:8443
+            DDEV_PROJECT: DrupalLearning
+            DDEV_PROJECT_TYPE: drupal10
+            DDEV_ROUTER_HTTP_PORT: "80"
+            DDEV_ROUTER_HTTPS_PORT: "8443"
+            DDEV_SITENAME: DrupalLearning
+            DDEV_TLD: ddev.site
+            DDEV_VERSION: v1.23.4
+            DDEV_WEB_ENTRYPOINT: /mnt/ddev_config/web-entrypoint.d
+            DDEV_WEBSERVER_TYPE: nginx-fpm
+            DDEV_XDEBUG_ENABLED: "false"
+            DEPLOY_NAME: local
+            DOCKER_IP: 127.0.0.1
+            DOCROOT: web
+            DRUPAL_NIGHTWATCH_IGNORE_DIRECTORIES: node_modules,vendor,.*,sites/*/files,sites/*/private,sites/simpletest
+            DRUPAL_NIGHTWATCH_OUTPUT: reports/nightwatch
+            DRUPAL_NIGHTWATCH_SEARCH_DIRECTORY: ../
+            DRUPAL_TEST_BASE_URL: http://web
+            DRUPAL_TEST_CHROMEDRIVER_AUTOSTART: "false"
+            DRUPAL_TEST_DB_URL: mysql://db:db@db/db
+            DRUPAL_TEST_WEBDRIVER_CHROME_ARGS: --disable-gpu --headless --no-sandbox --disable-dev-shm-usage
+            DRUPAL_TEST_WEBDRIVER_HOSTNAME: selenium-chrome
+            DRUPAL_TEST_WEBDRIVER_PATH_PREFIX: /wd/hub
+            DRUPAL_TEST_WEBDRIVER_PORT: "4444"
+            DRUSH_ALLOW_XDEBUG: "1"
+            DRUSH_OPTIONS_URI: https://drupallearning.ddev.site:8443
+            DTT_BASE_URL: http://web
+            DTT_MINK_DRIVER_ARGS: '["chrome", {"browserName":"chrome","goog:chromeOptions":{"w3c":false,"args":["--disable-gpu","--headless", "--no-sandbox", "--disable-dev-shm-usage"]}}, "http://selenium-chrome:4444/wd/hub"]'
+            GOARCH: amd64
+            GOOS: linux
+            HOST_DOCKER_INTERNAL_IP: ""
+            HTTP_EXPOSE: 80:80,8025:8025
+            HTTPS_EXPOSE: 8443:80,8026:8025
+            IS_DDEV_PROJECT: "true"
+            LINES: "22"
+            MINK_DRIVER_ARGS_WEBDRIVER: '["chrome", {"browserName":"chrome","goog:chromeOptions":{"w3c":false,"args":["--disable-gpu","--headless", "--no-sandbox", "--disable-dev-shm-usage"]}}, "http://selenium-chrome:4444/wd/hub"]'
+            MYSQL_HISTFILE: /mnt/ddev-global-cache/mysqlhistory/DrupalLearning-web/mysql_history
+            MYSQL_PWD: db
+            NODE_EXTRA_CA_CERTS: /mnt/ddev-global-cache/mkcert/rootCA.pem
+            PGDATABASE: db
+            PGHOST: db
+            PGPASSWORD: db
+            PGUSER: db
+            PHP_IDE_CONFIG: serverName=DrupalLearning.ddev.site
+            SIMPLETEST_BASE_URL: http://web
+            SIMPLETEST_DB: mysql://db:db@db/db
+            SSH_AUTH_SOCK: /home/.ssh-agent/socket
+            TZ: ""
+            USER: admin
+            VIRTUAL_HOST: drupallearning.ddev.site
+            npm_config_cache: /mnt/ddev-global-cache/npm
+        external_links:
+            - ddev-router:drupallearning.ddev.site
+        extra_hosts:
+            - host.docker.internal=host-gateway
+        healthcheck:
+            interval: 1s
+            retries: 70
+            start_interval: 1s
+            start_period: 2m0s
+            timeout: 1m10s
+        hostname: DrupalLearning-web
+        image: ddev/ddev-webserver:v1.23.4-DrupalLearning-built
+        labels:
+            com.ddev.app-type: drupal10
+            com.ddev.approot: /home/admin/Workspace/DrupalLearning
+            com.ddev.platform: ddev
+            com.ddev.site-name: DrupalLearning
+        links:
+            - selenium-chrome
+        networks:
+            ddev_default: null
+            default: null
+        ports:
+            - host_ip: 127.0.0.1
+              mode: ingress
+              protocol: tcp
+              target: 80
+            - host_ip: 127.0.0.1
+              mode: ingress
+              protocol: tcp
+              target: 443
+        restart: "no"
+        user: 1000:1000
+        volumes:
+            - consistency: cached
+              source: ../
+              target: /var/www/html
+              type: bind
+            - bind:
+                create_host_path: true
+              read_only: true
+              source: /home/admin/Workspace/DrupalLearning/.ddev
+              target: /mnt/ddev_config
+              type: bind
+            - bind:
+                create_host_path: true
+              read_only: true
+              source: /home/admin/Workspace/DrupalLearning/.ddev/xhprof
+              target: /usr/local/bin/xhprof
+              type: bind
+            - source: ddev-global-cache
+              target: /mnt/ddev-global-cache
+              type: volume
+              volume: {}
+            - source: ddev-ssh-agent_socket_dir
+              target: /home/.ssh-agent
+              type: volume
+              volume: {}
+        working_dir: /var/www/html/
+volumes:
+    database:
+        external: true
+        name: DrupalLearning-mariadb
+    ddev-global-cache:
+        external: true
+        name: ddev-global-cache
+    ddev-ssh-agent_socket_dir:
+        external: true
+        name: ddev-ssh-agent_socket_dir

@@ -1,0 +1,104 @@
+#ddev-generated
+# If you remove the ddev-generated line above you
+# are responsible for maintaining this file. DDEV will not then
+# update it, for example if you add `additional_hostnames`, etc.
+
+http:
+  routers:
+    DrupalLearning-selenium-chrome-7900-http:
+      entrypoints:
+        - http-7910
+      rule: HostRegexp(`^drupallearning\.ddev\.site$`)
+      
+      service: "DrupalLearning-selenium-chrome-7900"
+      ruleSyntax: v3
+      tls: false
+      # middlewares:
+      #   - "DrupalLearning-redirectHttps"
+    DrupalLearning-web-80-http:
+      entrypoints:
+        - http-80
+      rule: HostRegexp(`^drupallearning\.ddev\.site$`)
+      
+      service: "DrupalLearning-web-80"
+      ruleSyntax: v3
+      tls: false
+      # middlewares:
+      #   - "DrupalLearning-redirectHttps"
+    DrupalLearning-web-8025-http:
+      entrypoints:
+        - http-8025
+      rule: HostRegexp(`^drupallearning\.ddev\.site$`)
+      
+      service: "DrupalLearning-web-8025"
+      ruleSyntax: v3
+      tls: false
+      # middlewares:
+      #   - "DrupalLearning-redirectHttps"
+    
+    
+    DrupalLearning-selenium-chrome-7900-https:
+      entrypoints:
+        - http-7900
+      rule: HostRegexp(`^drupallearning\.ddev\.site$`)
+      
+      service: "DrupalLearning-selenium-chrome-7900"
+      ruleSyntax: v3
+      
+      tls: true
+      
+    
+    
+    DrupalLearning-web-80-https:
+      entrypoints:
+        - http-8443
+      rule: HostRegexp(`^drupallearning\.ddev\.site$`)
+      
+      service: "DrupalLearning-web-80"
+      ruleSyntax: v3
+      
+      tls: true
+      
+    DrupalLearning-web-8025-https:
+      entrypoints:
+        - http-8026
+      rule: HostRegexp(`^drupallearning\.ddev\.site$`)
+      
+      service: "DrupalLearning-web-8025"
+      ruleSyntax: v3
+      
+      tls: true
+      
+    
+
+  middlewares:
+    DrupalLearning-redirectHttps:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+  services:
+    DrupalLearning-selenium-chrome-7900:
+      loadbalancer:
+        servers:
+          - url: http://ddev-DrupalLearning-selenium-chrome:7900
+        
+    
+    DrupalLearning-web-80:
+      loadbalancer:
+        servers:
+          - url: http://ddev-DrupalLearning-web:80
+        
+    DrupalLearning-web-8025:
+      loadbalancer:
+        servers:
+          - url: http://ddev-DrupalLearning-web:8025
+        
+    
+    
+    
+
+tls:
+  certificates:
+    - certFile: /mnt/ddev-global-cache/traefik/certs/DrupalLearning.crt
+      keyFile: /mnt/ddev-global-cache/traefik/certs/DrupalLearning.key
